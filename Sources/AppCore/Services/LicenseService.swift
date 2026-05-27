@@ -44,8 +44,7 @@ public final class LicenseService: LicenseServiceProtocol, @unchecked Sendable {
     }
 
     public func currentLicense() -> License {
-        lock.lock(); defer { lock.unlock() }
-        return cached
+        lock.withLock { cached }
     }
 
     public func activate(key: String) async throws -> License {
@@ -72,7 +71,7 @@ public final class LicenseService: LicenseServiceProtocol, @unchecked Sendable {
         }
         try keychain.remove("license-jwt")
         try keychain.remove("license-key")
-        lock.lock(); cached = .free; lock.unlock()
+        lock.withLock { cached = .free }
     }
 
     public func refresh() async throws -> License {
@@ -100,7 +99,7 @@ public final class LicenseService: LicenseServiceProtocol, @unchecked Sendable {
         if let key = license.key {
             try keychain.setString(key, for: "license-key")
         }
-        lock.lock(); cached = license; lock.unlock()
+        lock.withLock { cached = license }
     }
 
     private func loadFromKeychain() throws -> License? {
