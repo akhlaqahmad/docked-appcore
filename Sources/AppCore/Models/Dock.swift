@@ -62,13 +62,36 @@ public struct DockPosition: Codable, Hashable, Sendable {
 
     public var edge: Edge
     public var alignment: Alignment
-    public var offset: CGPoint
+    public var offset: DockOffset
 
-    public init(edge: Edge = .bottom, alignment: Alignment = .center, offset: CGPoint = .zero) {
+    public init(edge: Edge = .bottom, alignment: Alignment = .center, offset: DockOffset = .zero) {
         self.edge = edge
         self.alignment = alignment
         self.offset = offset
     }
 
     public static let `default` = DockPosition()
+}
+
+/// A 2D offset in points. Defined locally rather than reusing `CGPoint`
+/// because `CGPoint`'s `Hashable` / `Sendable` conformances are
+/// SDK-dependent and unavailable in some macOS 14 SDK builds (notably the
+/// one shipped with Xcode 15.4 / GitHub's macos-14 runner). This struct
+/// has identical semantics and converts to/from `CGPoint` trivially.
+public struct DockOffset: Codable, Hashable, Sendable {
+    public var x: CGFloat
+    public var y: CGFloat
+
+    public init(x: CGFloat = 0, y: CGFloat = 0) {
+        self.x = x
+        self.y = y
+    }
+
+    public static let zero = DockOffset(x: 0, y: 0)
+
+    public var cgPoint: CGPoint { CGPoint(x: x, y: y) }
+
+    public init(_ point: CGPoint) {
+        self.init(x: point.x, y: point.y)
+    }
 }
