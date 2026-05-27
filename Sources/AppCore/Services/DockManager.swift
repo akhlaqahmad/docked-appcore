@@ -84,6 +84,16 @@ public final class DockManager {
         persistDebounced()
     }
 
+    /// Show or hide a dock. The `DockWindowOrchestrator` observes the `isEnabled`
+    /// flag and orderFront / orderOut the corresponding panel.
+    public func setEnabled(dockID: UUID, enabled: Bool) throws {
+        guard let idx = library.docks.firstIndex(where: { $0.id == dockID }) else { throw DockManagerError.dockNotFound }
+        guard library.docks[idx].isEnabled != enabled else { return }
+        library.docks[idx].isEnabled = enabled
+        library.docks[idx].updatedAt = .now
+        persistDebounced()
+    }
+
     // MARK: - Item CRUD
 
     public func addItem(_ item: DockItem, to dockID: UUID) throws {
